@@ -49,6 +49,14 @@ async function run() {
       res.send(result)
 
     });
+      // job create PosT 
+      app.post('/jobs', async (req,res) =>{
+        const newjobs = req.body;
+        const result = await jobscollection.insertOne(newjobs);
+        res.send(result)
+
+      })
+
 
     //jobaPPliction aPPly 
     // get all data, get one data, get some data [0,1, many]
