@@ -37,7 +37,12 @@ async function run() {
     const jobaPPlictioncollection = client.db('Jobportal').collection('job-aPPlication');
     
     app.get('/jobs' ,async(req,res) =>{
-        const cursor = jobscollection.find();
+      const email = req.query.email;
+      let query = {}
+      if(email){
+        query = {hr_email: email}
+      }
+        const cursor = jobscollection.find(query);
         const result = await cursor.toArray();
         res.send(result)
 
@@ -80,11 +85,37 @@ async function run() {
       }
 
       res.send(result)
+    });
+
+    app.get('/job-aPPlication/jobs/:job_id' , async (req,res) =>{
+      const jobId = req.params.job_id;
+      const qurey = {job_id: jobId};
+      const result = await jobaPPlictioncollection.find(qurey).toArray();
     })
 
     app.post('/job-aPPlication' ,async( req,res) =>{
       const aPPlication = req.body;
       const  result = await jobaPPlictioncollection.insertOne(aPPlication);
+      // not the best way 
+      //skiP it 
+      const id = aPPlication.job_id;
+      const query = {_id: new ObjectId(id)}
+      const job = await jobscollection.findOne(query)
+      let newcount = 0;
+      if(job.aPPlicationcount){
+        count =job.aPPlicationcount + 1;
+      }
+      else{
+        newcount =1;
+      }
+      //now uPdate the filter job info
+      const filter ={_id:new ObjectId(id)};
+      const updateDoc ={
+        $set:{
+          aPPlicationcount: newcount
+        }
+      }
+      const updateresult =await jobscollection.updateOne(filter,updateDoc); 
       res.send(result)
 
     })
